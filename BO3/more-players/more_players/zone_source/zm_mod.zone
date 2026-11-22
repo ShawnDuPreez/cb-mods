@@ -1,0 +1,26 @@
+>mode,zm
+>type,common
+
+#include "zm_mod.class"
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+rawfile,dummy.cfg
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// more_players: server side
+// stock script plus one using line, which loads zm_more_players.gsc on every map
+scriptparsetree,scripts/zm/gametypes/_clientids.gsc
+scriptparsetree,scripts/zm/zm_more_players.gsc
+// stock script plus one guard in score_cf_increment_info
+scriptparsetree,scripts/zm/_zm_score.gsc
+
+// more_players: client side
+// stock script plus one using line, which loads zm_more_players.csc on every map
+scriptparsetree,scripts/zm/_zm_score.csc
+scriptparsetree,scripts/zm/zm_more_players.csc
+
+// more_players: the same three files as in core_mod.zone, so a match has them
+// whichever of the two fastfiles the game reads them from
+rawfile,gamedata/configs/zm/zm_default_gamesettings.cfg
+rawfile,ui/t7/utility/codutilityrequire.lua
+rawfile,ui/more_players/more_players.lua

@@ -38,7 +38,11 @@ not stored in the repository.
 
 ## Black Ops 3 (`BO3/`)
 
-An 8-player zombies mod for Black Ops 3 is being worked on. It is not in this repository yet.
+[More Players](BO3/more-players/README.md): up to 8 players in one zombies match, with score
+rows and revive icons for players 5 to 8. It works on the BOIII client (hosted with 7 bots on
+all 14 maps). Not tried with real people in slots 5 to 8, and not built for the Steam game
+or the Workshop. There is no download on the releases page yet; its README says how to
+build it.
 
 ## License
 
@@ -46,3 +50,8 @@ GPL-3.0, see [LICENSE](LICENSE). Two files in More Players,
 `custom_scripts/cp/scoreboard.gsc` and `ui_scripts/ZombiesPlayers/__init__.lua`, come from
 [auroramod/iw7-mod](https://github.com/auroramod/iw7-mod) (pull request 714), which is
 GPL-3.0 as well.
+
+Four files in the Black Ops 3 mod are the game's own files with a few lines added, which is
+how a Black Ops 3 mod changes them: `scripts/zm/_zm_score.gsc`, `scripts/zm/_zm_score.csc`,
+`scripts/zm/gametypes/_clientids.gsc` and `ui/t7/utility/codutilityrequire.lua`. Those stay
+the game publisher's and the GPL covers only the added lines.
