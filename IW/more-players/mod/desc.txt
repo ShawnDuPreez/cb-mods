@@ -1,0 +1,1 @@
+8-player zombies. The host loads this mod, then hosts a Custom Game. Every player needs it.

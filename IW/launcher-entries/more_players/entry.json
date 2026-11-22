@@ -1,0 +1,18 @@
+{
+    "id": "more_players",
+    "type": "mod",
+    "name": "More Players",
+    "author": "ShawnDuPreez",
+    "version": "1.0",
+    "description": "8-player zombies: the lobby holds 8, the game's 4-player assumptions are patched, the HUD and scoreboard show everyone, and with more than 4 players the Magic Wheel can hand out wonder weapons the team has already built. The host picks the mod in the Mods menu; every player needs it.",
+    "images": [
+        "main.png"
+    ],
+    "requires": [],
+    "archives": [
+        {
+            "url": "https://github.com/ShawnDuPreez/cb-mods/releases/download/iw-v1.0/iw-more-players.zip",
+            "size": 12766
+        }
+    ]
+}

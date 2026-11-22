@@ -1,0 +1,3 @@
+rawfile,more_players/about.txt
+luafile,ui_scripts/MorePlayers/__init__.lua
+luafile,ui_scripts/ZombiesPlayers/__init__.lua

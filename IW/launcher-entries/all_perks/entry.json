@@ -1,0 +1,16 @@
+{
+    "id": "all_perks",
+    "type": "mod",
+    "name": "All Perks",
+    "author": "ShawnDuPreez",
+    "version": "1.0",
+    "description": "Every player starts a zombies match with all of the map's perks and gets them back after going down. The host picks the mod in the Mods menu; every player needs it.",
+    "images": [],
+    "requires": [],
+    "archives": [
+        {
+            "url": "https://github.com/ShawnDuPreez/cb-mods/releases/download/iw-v1.0/iw-all-perks.zip",
+            "size": 3119
+        }
+    ]
+}

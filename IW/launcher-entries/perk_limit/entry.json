@@ -1,0 +1,16 @@
+{
+    "id": "perk_limit",
+    "type": "mod",
+    "name": "Perk Limit",
+    "author": "ShawnDuPreez",
+    "version": "1.0",
+    "description": "The host chooses how many perks a player may hold (1 to 11, or no limit) from a PERK LIMIT row in the zombies lobby's Match Settings. The host picks the mod in the Mods menu; every player needs it.",
+    "images": [],
+    "requires": [],
+    "archives": [
+        {
+            "url": "https://github.com/ShawnDuPreez/cb-mods/releases/download/iw-v1.0/iw-perk-limit.zip",
+            "size": 12580
+        }
+    ]
+}
