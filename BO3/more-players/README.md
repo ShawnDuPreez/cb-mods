@@ -16,6 +16,10 @@ Details are under [What was tested](#what-was-tested).
 
 ## Play it on BOIII
 
+Download `bo3-more-players.zip` from the
+[releases page](https://github.com/ShawnDuPreez/cb-mods/releases) and unpack it into the
+BOIII game folder (the one with `boiii.exe`). Or build it from this folder:
+
 ```bash
 ./build-boiii.sh --install
 ```
@@ -29,7 +33,8 @@ In the game: **Mods** on the main menu, pick **More Players**, wait for the relo
 
 `./build-boiii.sh --remove` takes it out again.
 
-**Friends** need the same files. The build also writes `dist/more-players-boiii.zip`.
+**Friends** need the same files: the zip from the releases page, or
+`dist/more-players-boiii.zip`, which the build writes and which is the same thing.
 They unpack it into their BOIII game folder, so that these two folders land there:
 
 ```

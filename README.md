@@ -41,8 +41,12 @@ not stored in the repository.
 [More Players](BO3/more-players/README.md): up to 8 players in one zombies match, with score
 rows and revive icons for players 5 to 8. It works on the BOIII client (hosted with 7 bots on
 all 14 maps). Not tried with real people in slots 5 to 8, and not built for the Steam game
-or the Workshop. There is no download on the releases page yet; its README says how to
-build it.
+or the Workshop.
+
+**Install:** download `bo3-more-players.zip` from the
+[releases page](https://github.com/ShawnDuPreez/cb-mods/releases) and extract it into your
+BOIII game folder, the one that holds `boiii.exe`. Start the game, pick More Players under
+Mods, then Zombies > Private Game. Every player needs it.
 
 ## License
 
