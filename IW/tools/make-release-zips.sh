@@ -3,7 +3,9 @@
 # Each is laid out from the game folder (the one that holds iw7-mod.exe):
 #
 #   mods/<mod>/...                    the mod, for every player
-#   iw7-mod/ui_scripts/<Name>/...     the host's menu script, where a mod has one
+#   iw7-mod/ui_scripts/<Name>/...     menu and HUD scripts that must load from the
+#                                     game's own folder (More Players: for every
+#                                     player; Perk Limit: the host's menu row)
 #
 # so extracting a zip into the game folder installs the whole mod, and the CB
 # launcher can install it the same way from one archive.
@@ -46,6 +48,6 @@ build() {
     unzip -Z1 "$zip" | sed 's/^/    /'
 }
 
-build iw-more-players.zip more-players more_players "ui_scripts/MorePlayersLobby/__init__.lua"
+build iw-more-players.zip more-players more_players "ui_scripts/MorePlayers/__init__.lua" "ui_scripts/ZombiesPlayers/__init__.lua"
 build iw-all-perks.zip all-perks all_perks
 build iw-perk-limit.zip perk-limit perk_limit "ui_scripts/PerkLimit/__init__.lua"

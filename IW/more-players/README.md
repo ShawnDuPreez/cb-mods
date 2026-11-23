@@ -18,14 +18,16 @@ weapons the team has already built.
 | `custom_scripts/cp/scoreboard.gsc` | the host | host |
 | `ui_scripts/MorePlayers/__init__.lua` | each player's menus and HUD | everyone |
 | `ui_scripts/ZombiesPlayers/__init__.lua` | each player's HUD | everyone |
-| `ui_scripts/MorePlayersLobby/__init__.lua` | the host's menus | host, and only with the mod picked in the Mods menu (see Install) |
 
-The first two `ui_scripts` files are not optional for joiners. Without `ZombiesPlayers`, a player
-who lands in slot 5 or higher gets falling FPS and is kicked after a while, because the stock
-HUD can not build for that slot.
+The two `ui_scripts` files are not optional for joiners. Without `ZombiesPlayers`, a player
+who lands in slot 5 or higher has no working HUD, gets falling FPS and is kicked after a
+while, because the stock HUD can not build for that slot. They are packed in `mod.ff` and
+also installed in the game's own `iw7-mod/ui_scripts/` folder (see Install), because that
+folder always loads.
 
-The simplest rule: everyone has the first four (they are what the mod and the always-on zip
-contain), and whoever hosts with the mod picked in the Mods menu adds the fifth.
+`ui_scripts/MorePlayersLobby` was a host-only lobby script in version 1.0. `MorePlayers` in
+`iw7-mod/ui_scripts/` now does its job; a leftover copy does no harm and
+`./install.sh --remove` takes it out.
 
 ## Install
 
@@ -61,18 +63,20 @@ game folder, the one that holds `iw7-mod.exe` (in the CB Servers launcher: Infin
 Browse Local Files). Start the game, open the Mods menu and pick MORE_PLAYERS, then host a
 Custom Game.
 
-The zip puts two things in place:
+The zip puts two things in place, and every player needs both:
 
-- `mods/more_players/`, the mod itself. Every player needs it.
-- `iw7-mod/ui_scripts/MorePlayersLobby/`, the lobby script. Only the host uses it.
+- `mods/more_players/`, the mod itself: the host's game scripts and `mod.ff`.
+- `iw7-mod/ui_scripts/MorePlayers/` and `iw7-mod/ui_scripts/ZombiesPlayers/`, the menu and
+  HUD scripts.
 
-Why the second one: right after a mod is picked, the game runs nothing from that mod's folder
-and starts its menus before the mod's `mod.ff` is ready. Only files in the game's own
-`iw7-mod` folder are used at that point. So without the lobby script the first match after
-picking the mod starts with 4 slots, and only the second one with 8. The lobby script does
-the one thing the lobby needs, and nothing unless MORE_PLAYERS is the loaded mod.
+Why the second one: the menu and HUD scripts packed in `mod.ff` only run when `mod.ff` is
+already loaded as the menus start. Right after a mod is picked it is not, so the first match
+after picking the mod started with 4 slots; and on 2026-11-23 players 5 to 7 joined with no
+HUD at all. Files in the game's own `iw7-mod` folder always load, and iw7-mod uses them
+instead of the copies in `mod.ff` (component/ui_scripting.cpp). The lobby size changes only
+while MORE_PLAYERS is the loaded mod; the HUD parts only act in zombies.
 
-From a copy of this repository, `./install.sh --menu` installs just the lobby script.
+From a copy of this repository, `./install.sh --menu` installs just those two.
 
 - Use this form or the always-on files, not both. If the files are also in `iw7-mod/`, those win.
 - Tested on 2026-11-22 without the lobby script: picked in the Mods menu, hosted a Custom
@@ -95,7 +99,8 @@ From a copy of this repository, `./install.sh --menu` installs just the lobby sc
   (x64-zt) through Proton; the top of that script says what it needs. A rebuild from
   unchanged files gives the same file byte for byte (checked 2026-11-22). The file only has
   to change when `ui_scripts/MorePlayers` or `ui_scripts/ZombiesPlayers` does; the `.gsc`
-  files and the host's lobby script are not in it.
+  files are not in it. Rebuilt on 2026-11-23 for the name tag fix
+  (sha256 `bb8c9911…`); the same run rebuilt the 1.0 sources into the 1.0 file byte for byte.
 
 ### Bots for trying it alone
 
@@ -103,13 +108,46 @@ From a copy of this repository, `./install.sh --menu` installs just the lobby sc
 bots to a match you host. In the console before starting the match: `set more_players_bots 7`.
 They join about 12 seconds in and stand still.
 
+**To play in slot 5 yourself** (or any slot up to 8): `test/join-as-player.sh cp_rave 5`
+starts a private server on this PC running the mod as installed in your game folder, with 4
+bots in slots 1 to 4. When it says ready, go to the Zombies menu in your game, open the
+console and type `connect 127.0.0.1:27045`. You land in slot 5 and can try buying, doors,
+perks, the HUD and name tags there. Ctrl+C in the terminal stops the server.
+
 ## Play
 
 1. Zombies menu, then Custom Game. The lobby now holds 8.
 2. Others join the host as usual.
 
 Solo is unchanged. On a dedicated server, put `set party_maxplayers 8` in the server config;
-the lobby script does not apply there.
+the menu scripts do not apply there.
+
+### "Server is full." when a fifth player joins
+
+How many players a match holds is settled when the host starts it. The game takes the host's
+lobby size (`party_maxplayers`) at that moment and keeps it for the whole match: nothing can
+add a slot to a match that is running. So this message means the host's lobby held 4, not 8,
+when the match started. The joining player's own files have nothing to do with it.
+
+Every place this project sets the lobby size sets it to 8. A host still gets 4 in the first
+match after picking MORE_PLAYERS when `MorePlayers` is not in that PC's
+`iw7-mod/ui_scripts/` (see [Install](#as-a-mod-you-pick-in-the-game-the-normal-way)).
+
+The host is told when that happens. A match with more than 1 and fewer than 8 slots shows
+this to the host, in the middle of the screen, three times in the first minute:
+
+```
+More Players: this match has 4 player slots, not 8.
+For 8, go back to the Zombies menu and host again.
+```
+
+Every match also writes `More Players: this match has N player slots` to the host's
+`iw7-mod/logs/console.log`, so a host can check without waiting for a fifth player.
+
+To get 8, the host ends the match, goes back to the Zombies menu and opens Custom Game
+again. By then the mod's own menu script is loaded and the new lobby holds 8. To stop it
+happening at all, extract the whole `iw-more-players.zip` into the game folder, or run
+`./install.sh --menu` from a copy of this repository.
 
 ## With All Perks and Perk Limit
 
@@ -126,7 +164,12 @@ on a private server with bots, and it passes.
 ## What it changes
 
 **Lobby** (`MorePlayers`): the zombies menu sets the lobby size to 4 each time it opens. The
-script turns that 4 into 8.
+script turns that 4 into 8 while MORE_PLAYERS is the loaded mod.
+
+**Name tags** (`MorePlayers`): the game builds name tags for `ui_maxclients` players, and the
+zombies lobby config sets that to 4, so whoever kept the 4 (the host at least) saw no tags
+above player 4. In a zombies match the menu scripts now read 8 there; the dvar itself is not
+changed. If the game built its tag list before the script loaded, the script rebuilds it for 8.
 
 **Game scripts** (`more_players.gsc`):
 
@@ -134,11 +177,29 @@ script turns that 4 into 8.
 | --- | --- |
 | The character pool holds 4. Player 5 gets no character and a script error. | Extra players get the map's guest star first, then a second copy of whichever of the four main characters the fewest players are using. |
 | Start spawn is picked by player slot from 4 points. Slot 6 and up never spawn. | Extra slots start next to a stock point, on the spot with the most room that a player could walk to from it. Zombie-only rooms behind windows are left out. |
-| HUD portraits are written by slot into 4 places. Higher slots cause a script error on every portrait update. | Slots 5 and up are sent to the HUD another way. No error. |
+| HUD portraits are written by slot into 4 places. Higher slots cause a script error on every portrait update. | Slots 5 and up are sent to the HUD another way. No error. Until 2026-11-23 this left slots 5 to 8 with no HUD at all: the intro shows the HUD only once a player's portrait is marked set up, and that mark was skipped with the portrait bits. It is now set for them too (seen working as player 5). |
 | Two revive progress bars exist. A third revive at the same time errors and the revive breaks. | A third revive works. Onlookers just see no bar for it. |
 | Zombie targeting groups exist for 4 players. Asking for a 6th is a script error. | Each player takes a free group. With all four taken, zombies target the rest by the normal rules. |
 | Ghosts 'n Skulls teleports are picked by player slot. | Extra slots reuse the spots. |
 | Spaceland team-door counters are left unset above 4 players. | 5 or more players count as 4. |
+| Each map has 4 interaction triggers, one per player. Buying, doors, perks, the box, windows and everything else used with the use button go through them. Players 5 and up got none, and the stock script then stopped handing them out, so players 1 to 4 lost theirs after a death. | When the map's 4 are taken, the player gets a usable script model as their trigger (below). |
+| The end-of-game stats table has 4 rows, written by player slot. Every money change writes it. For slots 6 to 8 that write was a script error, so money earned never arrived and a buy took the money and then stopped before handing anything over. Slot 5 wrote over player 1's row. | Slots 1 to 4 keep their rows. Slots 5 to 8 have none: their money works, and the end screen still lists 4 players. |
+| Rave: each challenge kiosk has 4 station models, one per slot. Slots 5 to 8 saw none, and starting a challenge errored. | Slot N uses station N mod 4. A shared station lights up when it would for either player. |
+| Rave: the boat has 4 seats and each landing 4 exit points, by boarding order and slot. A 5th boarder errored, and slots 5 to 8 were left stuck after the ride or a down on the boat, with the use button switched off. | Extra boarders sit between two seats; extra slots land at a free spot next to an exit point, found like a start spawn. |
+| Spaceland coaster: 4 exit points and 4 high-score displays, by slot. Slots 5 to 8 were left stuck after the ride or a down on it, and every target hit errored. | Extra slots leave at a free spot next to an exit point. Their high score is kept but not shown. |
+| Director's Cut straight-to-boss: start points picked by slot. Slots past the last point had none. | Extra slots start at a free spot next to a start point. |
+
+**Interaction triggers for players 5 to 8:** a script model takes every call the interaction
+scripts make on the trigger (hint, hint values, field of view, per-player use, moving it),
+except the trigger-only "require look at" setting. That call logs an error when
+`developer_script` is on and is otherwise skipped; the script carries on (checked on a test
+server, with and without `developer_script`). A script model is always used by looking at it.
+Copying the map's own triggers instead does not work: a map entity file with 4 copies hung the
+server at map load, because each copy shares its trigger shape with a stock trigger. The host's
+log says `More Players: interaction trigger N made by script` when one is made.
+
+The script also checks the slot count at the start of every match and tells the host when it
+is not 8. See ["Server is full."](#server-is-full-when-a-fifth-player-joins)
 
 **HUD and scoreboard** (iw7-mod's `ZombiesPlayers` and `scoreboard.gsc`, plus `MorePlayers`):
 
@@ -273,8 +334,30 @@ Wheel checks instead.
   and a player really building one first. The test sets the "built" state by script.
 - 8 real people. Bots do not move, shoot, buy or revive.
 - A long game. Runs lasted a few minutes of round 1.
-- Joining over the internet from another PC.
-- Boss fights, Easter eggs, the roller coaster, Director's Cut.
+- Joining over the internet from another PC with 8 slots. The first try, on 2026-11-23, was
+  a friend hosting Rave in the Redwoods with the mod loaded (the joining game did not have
+  to switch mods): a joining player got "Server is full." twice. The host's log was not
+  looked at, so the 4-slot match is read from that message, not seen.
+- The slot check in the real game: its log line was seen on 2026-11-23 (`8 player slots`),
+  its on-screen message was not.
+- A second try the same evening with 5 or more real players: players 5 to 7 could not buy or
+  use anything, their money went wrong, and they had no HUD or name tags. The first two are
+  the trigger and stats problems in [What it changes](#what-it-changes), fixed after that
+  try, as are the HUD (the scripts now also load from the game's own folder) and name tags.
+- The fixes made after that try, with real players. On 2026-11-23 the script ran on a test
+  server with 8 bots on all five maps (`test/bot-test.sh`): it loads, every slot spawns with a
+  character, the end-of-game stats and Rave station errors are gone, and nothing errors in
+  the mod's files. Slots 1 to 4 got the map's interaction triggers and 5 to 8 script ones,
+  and slot 6's own interaction loop picked up a nearby interaction on its script trigger.
+  Bots can not press use, so buying with a script trigger, the HUD and the name tags need a
+  real player: `test/join-as-player.sh` puts you in slot 5 (see Bots for trying it alone).
+  The Rave boat and the coaster were not ridden.
+  `test/more-players-lua-test.lua` checks the lobby guard and the name tag list against
+  stand-ins for the game (15 checks, each of five broken versions of the script fails it).
+- An earlier version of these fixes stopped the server at script load on Rave: a direct
+  reference to the coaster's script, which only Spaceland loads. Map-specific functions are
+  now looked up by name while their map runs, as iw7-mod's own `patches.gsc` does.
+- Boss fights, Easter eggs, the roller coaster ride itself, Director's Cut.
 
 ## Known limits
 
@@ -283,10 +366,14 @@ Wheel checks instead.
   character for the first moments of a match, until anyone's portrait next updates.
 - **Microphone icons:** hidden on the scoreboard while more than 4 players are in the game.
 - **End of game screen:** lists 4 players. Its data table has 4 rows.
-- **Spaceland roller coaster:** its score display has 4 slots. Scores for players 5 and up
-  are not shown and may not count.
-- **Director's Cut, straight-to-boss mode:** its spawn points are picked by player slot and
-  are not patched.
+- **HUD for slots 5 and up:** comes from `ui_scripts/ZombiesPlayers` on that player's own PC.
+  A player who did not extract the `iw7-mod` folder from the zip still depends on the copy in
+  `mod.ff`. Their `iw7-mod/logs/console.log` has the line
+  `Loading LUI script '…iw7-mod/ui_scripts/ZombiesPlayers'` when the folder copy loaded.
+- **Shared Rave challenge stations:** with more than 4 players two players share a station
+  model, and its light shows when it would for either of them.
+- **Spaceland roller coaster:** its score displays have 4 places. Scores for players 5 and up
+  are not shown.
 - **Boss fights and Easter egg steps:** many scale by player count with cases for 1 to 4
   only.
 - **Banter between the four characters:** the game only plays it with exactly 4 players.
@@ -294,11 +381,16 @@ Wheel checks instead.
   triggers that character's achievement call, the same as picking them in the menu.
 - **iw7-mod's `spawnBot` command:** crashes a zombies server in a loop. It is not part of
   this mod; do not use it in zombies.
+- **Changing map from the console during a match:** iw7-mod's `map` command, typed while a
+  match is running, starts the next map with `ui_maxclients` slots, and the zombies lobby
+  sets that to 4. A host who does this in an 8-player match would get a 4-slot one. Start
+  the next map from the lobby instead. This is read from iw7-mod's source (`party.cpp`,
+  `start_map_for_party`) and the game's `start_up_aliens_mp.cfg`, not tried.
 
 ## How it works
 
 iw7-mod loads every `.gsc` in `custom_scripts/cp/` when a zombies match starts and runs its
-`main()` and `init()`. `main()` uses iw7-mod's `replacefunc` to swap ten functions in the
+`main()` and `init()`. `main()` uses iw7-mod's `replacefunc` to swap 25 functions in the
 game's scripts for the versions in `more_players.gsc`. A replaced function can not be called
 again, so each one is a full rewrite of the original with the 4-player assumption removed.
 
@@ -308,8 +400,9 @@ script checks which ones are built and how many players are in, adds or removes 
 names, and reshuffles the list of every wheel that is not spinning.
 
 iw7-mod also loads every folder in `ui_scripts/` that has an `__init__.lua`, both in the
-menus and in a match. `MorePlayers` wraps four of the game's own Lua functions: the one that
-sets the lobby size, the two that pick a portrait, and the multiplayer scoreboard call.
+menus and in a match. `MorePlayers` wraps five of the game's own Lua functions: the one that
+sets the lobby size, the one that reads a number setting (for `ui_maxclients`, name tags),
+the two that pick a portrait, and the multiplayer scoreboard call.
 
 The game stores every player's character and health picture in one number per value, 3 bits
 per player, and those numbers only have room for 4 players. So for slots 5 and up the host

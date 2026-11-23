@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 # Copies files into the game's iw7-mod folder, or removes them.
 #
-#   ./install.sh --menu [dir]    the host's lobby script only: goes with the
-#                                mod picked in the Mods menu, so the lobby
-#                                holds 8 from the first match. It does nothing
-#                                unless MORE_PLAYERS is the loaded mod.
+#   ./install.sh --menu [dir]    the menu and HUD scripts only, for the mod
+#                                picked in the Mods menu: everyone who plays
+#                                needs them. The lobby part does nothing unless
+#                                MORE_PLAYERS is the loaded mod.
 #   ./install.sh [dir]           the always-on form: all the mod's files, on
 #                                in every match, no mod to pick
 #   ./install.sh --remove [dir]  remove whichever of the two is there
@@ -29,6 +29,12 @@ upstream=(
     "ui_scripts/ZombiesPlayers/__init__.lua"
 )
 host_menu=(
+    "ui_scripts/MorePlayers/__init__.lua"
+    "ui_scripts/ZombiesPlayers/__init__.lua"
+)
+# Earlier versions installed this host-only lobby script; MorePlayers now does
+# its job. --remove still takes it out.
+retired=(
     "ui_scripts/MorePlayersLobby/__init__.lua"
 )
 
@@ -53,7 +59,7 @@ fi
 dest="$game_dir/iw7-mod"
 
 if [[ "$remove" == 1 ]]; then
-    for file in "${ours[@]}" "${upstream[@]}" "${host_menu[@]}"; do
+    for file in "${ours[@]}" "${upstream[@]}" "${host_menu[@]}" "${retired[@]}"; do
         if [[ -f "$dest/$file" ]]; then
             rm -- "$dest/$file"
             echo "Removed $file"

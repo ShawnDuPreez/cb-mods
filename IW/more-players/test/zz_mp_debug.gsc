@@ -86,7 +86,7 @@ mp_debug_report()
             if ( isdefined( player.bit_position ) )
                 bits = "yes";
 
-            print( "[mpdbg]   slot " + player getentitynumber() + " char " + num + " portrait " + idx + " hudbits " + bits + " vo " + vo + " model " + player.model + " state " + player.sessionstate + " origin " + player.origin );
+            print( "[mpdbg]   slot " + player getentitynumber() + " char " + num + " portrait " + idx + " hudbits " + bits + " vo " + vo + " model " + player.model + " state " + player.sessionstate + " trigger " + isdefined( player.interaction_trigger ) + " origin " + player.origin );
         }
     }
 }
@@ -138,6 +138,49 @@ mp_debug_tests()
         print( "[mpdbg] DONE" );
         return;
     }
+
+    // Interaction triggers: test clients never get one from the stock spawn
+    // loop, so hand them out here the way assign_trigger_on_player_spawned does.
+    // With 8 players, 4 come from the map and 4 are script models.
+    foreach ( player in level.players )
+    {
+        if ( isdefined( player.interaction_trigger ) )
+            continue;
+
+        // Real players get this list when they connect; test clients may not.
+        if ( !isdefined( player.disabled_interactions ) )
+            player.disabled_interactions = [];
+
+        player.interaction_trigger = scripts\cp\cp_interaction::get_player_interaction_trigger();
+
+        if ( !isdefined( player.interaction_trigger ) )
+        {
+            print( "[mpdbg]   slot " + player getentitynumber() + " got NO interaction trigger" );
+            continue;
+        }
+
+        scripts\cp\cp_interaction::reset_interaction_triggers();
+        player.last_interaction_point = undefined;
+        player.interaction_trigger makeunusable();
+        player thread scripts\cp\cp_interaction::release_player_interaction_trigger();
+        player thread scripts\cp\cp_interaction::player_interaction_monitor();
+    }
+
+    print( "[mpdbg] TEST interaction triggers" );
+
+    foreach ( player in level.players )
+    {
+        if ( isdefined( player.interaction_trigger ) )
+            print( "[mpdbg]   slot " + player getentitynumber() + " trigger " + player.interaction_trigger.classname + " entity " + player.interaction_trigger getentitynumber() );
+    }
+
+    // Move slot 5 next to the closest interaction and let its monitor run on
+    // the script-model trigger for a few seconds.
+    w = mp_debug_by_slot( 5 );
+    spot = scripts\engine\utility::getclosest( w.origin, level.current_interaction_structs );
+    w setorigin( spot.origin + ( 24, 0, 0 ) );
+    wait 3;
+    print( "[mpdbg]   slot 5 at interaction " + spot.script_noteworthy + ": trigger at " + w.interaction_trigger.origin + " last point " + isdefined( w.last_interaction_point ) );
 
     a = mp_debug_by_slot( 0 );
     b = mp_debug_by_slot( 1 );
